@@ -124,3 +124,14 @@
 [+] test2 connected from ('127.0.0.1', 42540)
 [-] test2 disconnected
 [-] test disconnected
+[*] Server listening on port 5555
+[+] test connected from ('127.0.0.1', 44488)
+[+] test2 connected from ('127.0.0.1', 47788)
+[-] test disconnected
+[+] test connected from ('127.0.0.1', 59058)
+[-] test2 disconnected
+[-] test disconnected
+[+] test2 connected from ('127.0.0.1', 50130)
+[+] test connected from ('127.0.0.1', 50128)
+[-] test2 disconnected
+[-] test disconnected

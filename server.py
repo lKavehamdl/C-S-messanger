@@ -141,10 +141,26 @@ def main():
     print("[*] Server listening on port 5555")
     log("[*] Server listening on port 5555")
     
+    def accept_clients():
+        while True:
+            client_sock, addr = server.accept()
+            threading.Thread(target=handle_client, args=(client_sock, addr)).start()
+            
+    def monitor_input():
+        while True:
+            cmd = input()
+            if cmd.strip() == "1":
+                with lock:
+                    user_list = list(clients.keys())
+                print("[*] Current users:")
+                for u in user_list:
+                    print(f"- {u} (In chat: {clients[u]['in_chat']})")
+            elif cmd.strip() == "2":
+                print("shutting down.")
+                exit(0)
 
-    while True:
-        client_sock, addr = server.accept()
-        threading.Thread(target=handle_client, args=(client_sock, addr)).start()
+    threading.Thread(target=accept_clients, daemon=True).start()
+    monitor_input()  
 
 if __name__ == "__main__":
     main()
