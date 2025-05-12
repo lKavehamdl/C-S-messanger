@@ -82,3 +82,45 @@
 [+] test2 connected from ('127.0.0.1', 40910)
 [-] test disconnected
 [-] test2 disconnected
+[*] Server listening on port 1111
+[+] test connected
+[+] test2 connected
+[-] test disconnected
+[-] test2 disconnected
+[+] test connected
+[+] test2 connected
+[-] test2 disconnected
+[+] test2 connected
+[-] test2 disconnected
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test connected from ('127.0.0.1', 39104)
+[-] test disconnected
+[+] test connected from ('127.0.0.1', 41480)
+[+] test2 connected from ('127.0.0.1', 41492)
+[-] test2 disconnected
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test connected from ('127.0.0.1', 39968)
+[+] test2 connected from ('127.0.0.1', 39972)
+[-] test2 disconnected
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test connected from ('127.0.0.1', 54974)
+[+] test2 connected from ('127.0.0.1', 54990)
+[-] test2 disconnected
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test connected from ('127.0.0.1', 50952)
+[+] test2 connected from ('127.0.0.1', 32926)
+[-] test2 disconnected
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test connected from ('127.0.0.1', 50104)
+[+] test2 connected from ('127.0.0.1', 50096)
+[-] test2 disconnected
+[-] test disconnected
+[+] test connected from ('127.0.0.1', 42530)
+[+] test2 connected from ('127.0.0.1', 42540)
+[-] test2 disconnected
+[-] test disconnected

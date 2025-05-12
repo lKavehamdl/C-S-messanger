@@ -60,7 +60,7 @@ def background_listener(sock):
             from_user = msg["from"]
             time.sleep(0.3)
             print(f"\n[Incoming chat request from {from_user}]")
-            time.sleep(.3)
+            time.sleep(1)
             choice = input("Accept? (y/n): ").strip().lower()
             if choice == "y":
                 send_message(sock, {"type": "CHAT_ACCEPTED"})
@@ -72,12 +72,11 @@ def background_listener(sock):
 def main():
     global chatting
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(("127.0.0.1", 1111))
+    client.connect(("127.0.0.1", 11111))
 
     # Username login
     while True:
         msg = recv_message(client)
-        print(msg)
         if msg["type"] == "REQUEST_USERNAME":
             username = input("Enter a unique username: ")
             send_message(client, {"type": "USERNAME", "username": username})
@@ -86,7 +85,7 @@ def main():
         elif msg["type"] == "USERNAME_ACCEPTED":
             print("Connected to server.")
             break
-
+        
     threading.Thread(target=background_listener, args=(client,), daemon=True).start()
 
     while True:

@@ -39,12 +39,18 @@ def chat_session(user1, user2):
     def forward(source_sock, dest_sock, source_user):
         while True:
             msg = recv_message(source_sock)
-            if not msg or msg.get("text") == "#":
-                send_message(dest_sock, {"type": "CHAT_ENDED"})
-                send_message(source_sock, {"type": "CHAT_ENDED"})
+            if msg is None:
                 break
-            send_message(dest_sock, {"type": "CHAT_MESSAGE", "from": source_user, "text": msg["text"]})
-
+            if msg.get("type") == "CHAT_MESSAGE":
+                send_message(dest_sock, {
+                    "type": "CHAT_MESSAGE",
+                    "from": source_user,
+                    "text": msg["text"]
+                })
+            elif msg.get("type") == "CHAT_ENDED" or msg.get("text") == "#":
+                send_message(dest_sock, {"type": "CHAT_ENDED"})
+                break
+        
     t1 = threading.Thread(target=forward, args=(sock1, sock2, user1))
     t2 = threading.Thread(target=forward, args=(sock2, sock1, user2))
     t1.start()
@@ -130,7 +136,7 @@ def handle_client(client_sock, addr):
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(("0.0.0.0", 1111))
+    server.bind(("0.0.0.0", 11111))
     server.listen()
     print("[*] Server listening on port 5555")
     log("[*] Server listening on port 5555")
