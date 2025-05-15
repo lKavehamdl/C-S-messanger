@@ -262,3 +262,10 @@
 [-] test3 disconnected
 [+] test logged in from ('127.0.0.1', 43770)
 [+] test2 logged in from ('127.0.0.1', 43782)
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 45672)
+[+] test2 logged in from ('127.0.0.1', 45680)
+[+] test3 logged in from ('127.0.0.1', 60538)
+[-] test disconnected
+[-] test2 disconnected
+[-] test3 disconnected

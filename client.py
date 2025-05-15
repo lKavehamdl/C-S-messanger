@@ -14,6 +14,35 @@ def recv_message(sock):
         return json.loads(sock.recv(4096).decode())
     except:
         return None
+    
+    
+def group_chat_session(sock, group_id, members):
+    global chatting
+    chatting = True
+    print(f"\n[Group Chat Started with {', '.join(members)}. Type '#' to leave.]")
+
+    def listen():
+        global chatting
+        while chatting:
+            msg = recv_message(sock)
+            if not msg:
+                break
+            if msg["type"] == "GROUP_MESSAGE":
+                print(f"[{msg['from']}] {msg['text']}")
+            elif msg["type"] == "GROUP_LEFT":
+                print("\n[You left the group chat]")
+                chatting = False
+                break
+
+    threading.Thread(target=listen, daemon=True).start()
+
+    while chatting:
+        text = input()
+        if text == "#":
+            send_message(sock, {"type": "GROUP_LEFT"})
+            break
+        send_message(sock, {"type": "GROUP_MESSAGE", "text": text})
+
 
 def chat_session(sock, peer_name):
     global chatting
@@ -109,6 +138,19 @@ def background_listener(sock):
                 chat_session(sock, from_user)
             else:
                 send_message(sock, {"type": "CHAT_DECLINED"})
+        elif msg["type"] == "GROUP_INVITE":
+            inviter = msg["from"]
+            members = msg["members"]
+            print(f"\n[Group chat invite from {inviter} with members: {', '.join(members)}]")
+            choice = input("Accept? (y/n): ").strip().lower()
+            if choice == "y":
+                send_message(sock, {"type": "GROUP_ACCEPTED"})
+            else:
+                send_message(sock, {"type": "GROUP_DECLINED"})
+        elif msg["type"] == "GROUP_STARTED":
+            group_chat_session(sock, msg["group_id"], msg["members"])
+
+
 
 def main():
     global chatting
@@ -152,8 +194,9 @@ def main():
         print("1. Show users")
         print("2. Chat with someone")
         print("3. Change username")
-        print("4. Exit")
-        choice = input("Choice [1-4]: ")
+        print("4. Start group chat")
+        print("5. Exit")
+        choice = input("Choice [1-5]: ")
 
         if choice == "1":
             send_message(client, {"type": "SHOW_USERS"})
@@ -188,9 +231,25 @@ def main():
             elif res:
                 print("Error:", res.get("message", "Unknown error"))
 
-        elif choice == "4":
+        elif choice == "5":
             send_message(client, {"type": "EXIT"})
             break
+        elif choice == "4":
+            send_message(client, {"type": "SHOW_USERS"})
+            res = recv_message(client)
+            if res and res.get("type") == "USER_LIST":
+                users = res["users"]
+                if not users:
+                    print("No available users.")
+                    continue
+                print("Online users:", ", ".join(users))
+                targets = input("Enter comma-separated usernames: ").strip().split(",")
+                targets = [t.strip() for t in targets if t.strip()]
+                if targets:
+                    send_message(client, {"type": "GROUP_CHAT_REQUEST", "targets": targets})
+                    result = recv_message(client)
+                    if result and result.get("type") == "ERROR":
+                        print("Error:", result["message"])
 
     client.close()
     print("Disconnected.")

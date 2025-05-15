@@ -2,10 +2,13 @@ import socket
 import threading
 import json
 import os
+import time
 
 USERS = "users.txt"
 
-clients = {}  #socket, addr, port, thread, in_chat
+clients = {} 
+groups = {} 
+
 lock = threading.Lock()
 
 def log(message):
@@ -43,6 +46,47 @@ def recv_message(sock):
 def list_online_users(exclude=None):
     with lock:
         return [u for u in clients if u != exclude and not clients[u]['in_chat']]
+    
+def group_chat_session(group_id, members):
+    with lock:
+        for user in members:
+            clients[user]['in_chat'] = True
+        groups[group_id] = {"members": members, "active": True}
+    
+    def listen(user):
+        sock = clients[user]['socket']
+        while groups[group_id]["active"]:
+            msg = recv_message(sock)
+            if not msg:
+                break
+            if msg.get("type") == "GROUP_MESSAGE":
+                text = msg["text"]
+                for member in members:
+                    if member != user and member in clients:
+                        send_message(clients[member]['socket'], {
+                            "type": "GROUP_MESSAGE",
+                            "from": user,
+                            "group_id": group_id,
+                            "text": text
+                        })
+            elif msg.get("type") == "GROUP_LEFT" or msg.get("text") == "#":
+                send_message(sock, {"type": "GROUP_LEFT"})
+                break
+
+    threads = []
+    for user in members:
+        t = threading.Thread(target=listen, args=(user,))
+        t.start()
+        threads.append(t)
+    
+    for t in threads:
+        t.join()
+
+    with lock:
+        for user in members:
+            clients[user]['in_chat'] = False
+        groups[group_id]["active"] = False
+
 
 def chat_session(user1, user2):
     sock1 = clients[user1]['socket']
@@ -145,6 +189,52 @@ def handle_client(client_sock, addr):
             if msg["type"] == "SHOW_USERS":
                 online = list_online_users(username)
                 send_message(client_sock, {"type": "USER_LIST", "users": online})
+                
+            elif msg["type"] == "GROUP_CHAT_REQUEST":
+                targets = msg["targets"]  # List of usernames
+                with lock:
+                    all_online = all(t in clients and not clients[t]["in_chat"] for t in targets)
+                if not all_online:
+                    send_message(client_sock, {"type": "ERROR", "message": "One or more users not available."})
+                    continue
+                
+                accepted = []
+                rejected = False
+                for t in targets:
+                    try:
+                        send_message(clients[t]["socket"], {
+                            "type": "GROUP_INVITE",
+                            "from": username,
+                            "members": [username] + targets
+                        })
+                        reply = recv_message(clients[t]["socket"])
+                        if reply.get("type") == "GROUP_ACCEPTED":
+                            accepted.append(t)
+                        else:
+                            rejected = True
+                            break
+                    except:
+                        rejected = True
+                        break
+                    
+                if rejected or len(accepted) != len(targets):
+                    for t in accepted:
+                        send_message(clients[t]["socket"], {
+                            "type": "GROUP_DECLINED",
+                            "message": "Group chat cancelled."
+                        })
+                    send_message(client_sock, {"type": "ERROR", "message": "Group chat failed or declined."})
+                else:
+                    group_id = f"group_{username}_{int(time.time())}"
+                    members = [username] + targets
+                    for m in members:
+                        send_message(clients[m]["socket"], {
+                            "type": "GROUP_STARTED",
+                            "group_id": group_id,
+                            "members": members
+                        })
+                    threading.Thread(target=group_chat_session, args=(group_id, members)).start()
+
 
 
             elif msg["type"] == "CHAT_REQUEST":
