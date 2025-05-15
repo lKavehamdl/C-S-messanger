@@ -1,6 +1,9 @@
 import socket
 import threading
 import json
+import os
+
+USERS = "users.txt"
 
 clients = {}  #socket, addr, port, thread, in_chat
 lock = threading.Lock()
@@ -9,6 +12,20 @@ def log(message):
     with open("log.txt", "a") as f:
         f.write(message + "\n")
 
+
+def load_users():
+    if not os.path.exists(USERS):
+        return set()
+    with open(USERS, "r") as f:
+        return set(line.strip() for line in f if line.strip())
+    
+def save_user(username):
+    with open(USERS, "a") as f:
+        f.write(username + "\n")
+        
+
+users = load_users()
+        
 
 def send_message(sock, data):
     try:
@@ -71,28 +88,53 @@ def chat_session(user1, user2):
 
 def handle_client(client_sock, addr):
     username = None
-
-    # Request unique username
+    
     while True:
-        send_message(client_sock, {"type": "REQUEST_USERNAME"})
+        send_message(client_sock, {"type": "LOGIN_OR_SIGNUP"})
         response = recv_message(client_sock)
-        if not response or response.get("type") != "USERNAME":
+        if not response:
             continue
-        name = response["username"]
+        mode = response.get("mode")
+        name = response.get("username")
+
+        if not name or not name.isalnum():
+            send_message(client_sock, {"type": "INVALID_USERNAME"})
+            continue
+
         with lock:
-            if name.isalnum() and name not in clients:
-                username = name
-                clients[username] = {
-                    "socket": client_sock,
-                    "addr": addr[0],
-                    "port": addr[1],
-                    "in_chat": False
-                }
-                send_message(client_sock, {"type": "USERNAME_ACCEPTED"})
-                log(f"[+] {username} connected from {addr}")
-                break
-            else:
-                send_message(client_sock, {"type": "INVALID_USERNAME"})
+            if mode == "signup":
+                if name in users:
+                    send_message(client_sock, {"type": "SIGNUP_FAILED", "message": "Username already taken."})
+                else:
+                    users.add(name)
+                    save_user(name)
+                    username = name
+                    clients[username] = {
+                        "socket": client_sock,
+                        "addr": addr[0],
+                        "port": addr[1],
+                        "in_chat": False
+                    }
+                    send_message(client_sock, {"type": "USERNAME_ACCEPTED"})
+                    log(f"[+] {username} signed up from {addr}")
+                    break
+
+            elif mode == "login":
+                if name in users and name not in clients:
+                    username = name
+                    clients[username] = {
+                        "socket": client_sock,
+                        "addr": addr[0],
+                        "port": addr[1],
+                        "in_chat": False
+                    }
+                    send_message(client_sock, {"type": "USERNAME_ACCEPTED"})
+                    log(f"[+] {username} logged in from {addr}")
+                    break
+                else:
+                    send_message(client_sock, {"type": "LOGIN_FAILED", "message": "Username not found or already online."})
+
+
 
     try:
         while True:

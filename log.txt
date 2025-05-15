@@ -237,3 +237,28 @@
 [+] test2 connected from ('127.0.0.1', 40674)
 [-] test2 disconnected
 [-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 51014)
+[+] test2 signed up from ('127.0.0.1', 59834)
+[*] Server listening on port 5555
+[+] test3 signed up from ('127.0.0.1', 40392)
+[+] lkavehamdl logged in from ('127.0.0.1', 40404)
+[-] lkavehamdl disconnected
+[-] test3 disconnected
+[+] test logged in from ('127.0.0.1', 38016)
+[+] test2 logged in from ('127.0.0.1', 43568)
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 33076)
+[+] test2 logged in from ('127.0.0.1', 40846)
+[+] test3 logged in from ('127.0.0.1', 40856)
+[-] test2 disconnected
+[-] test3 disconnected
+[-] test disconnected
+[+] test logged in from ('127.0.0.1', 44278)
+[+] test2 logged in from ('127.0.0.1', 37730)
+[+] test3 logged in from ('127.0.0.1', 46956)
+[-] test disconnected
+[-] test2 disconnected
+[-] test3 disconnected
+[+] test logged in from ('127.0.0.1', 43770)
+[+] test2 logged in from ('127.0.0.1', 43782)

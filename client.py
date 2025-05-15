@@ -117,14 +117,31 @@ def main():
 
     while True:
         msg = recv_message(client)
-        if msg["type"] == "REQUEST_USERNAME":
-            username = input("Enter a unique username: ")
-            send_message(client, {"type": "USERNAME", "username": username})
-        elif msg["type"] == "INVALID_USERNAME":
-            print("Username invalid or taken.")
+        if msg["type"] == "LOGIN_OR_SIGNUP":
+            print("1. Login")
+            print("2. Sign up")
+            choice = input("Choose [1-2]: ").strip()
+            if choice == "1":
+                mode = "login"
+            elif choice == "2":
+                mode = "signup"
+            else:
+                print("Invalid choice.")
+                continue
+
+            username = input("Enter username: ").strip()
+            send_message(client, {"mode": mode, "username": username})
+
         elif msg["type"] == "USERNAME_ACCEPTED":
             print("Connected to server.")
             break
+        elif msg["type"] == "INVALID_USERNAME":
+            print("Invalid username. Only alphanumeric characters allowed.")
+        elif msg["type"] == "SIGNUP_FAILED":
+            print("Signup failed:", msg.get("message", "Unknown error"))
+        elif msg["type"] == "LOGIN_FAILED":
+            print("Login failed:", msg.get("message", "Unknown error"))
+
         
     threading.Thread(target=background_listener, args=(client,), daemon=True).start()
 
