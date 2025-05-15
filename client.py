@@ -2,6 +2,8 @@ import socket
 import threading
 import json
 import time
+import base64
+import os
 
 chatting = False
 
@@ -22,19 +24,35 @@ def chat_session(sock, peer_name):
 
     def listen():
         global chatting
+        file_buffer = None
+        filename = None
+
         while chatting:
             msg = recv_message(sock)
             if not msg:
                 break
-            if msg["type"] == "CHAT_MESSAGE":
+
+            msg_type = msg.get("type")
+
+            if msg_type == "CHAT_MESSAGE":
                 time.sleep(0.3)
                 print(f"[{msg['from']}] {msg['text']}")
-            elif msg["type"] == "CHAT_ENDED":
+
+            elif msg_type == "CHAT_ENDED":
                 time.sleep(0.3)
                 print("\n[Chat ended. Returning to menu.]")
                 chatting = False
                 break
 
+            elif msg["type"] == "FILE_TRANSFER":
+                filename = msg["filename"]
+                sender = msg.get("from", "Unknown")
+                file_data = msg["data"].encode('latin1')  # Decode using same method used to encode
+                with open("received_" + filename, "wb") as f:
+                    f.write(file_data)
+                print(f"\n[Receiving file '{filename}' from {sender}]")
+                print(f"[File received and saved as 'received_{filename}']")    
+            
     t = threading.Thread(target=listen, daemon=True)
     t.start()
 
@@ -42,30 +60,55 @@ def chat_session(sock, peer_name):
         try:
             time.sleep(0.3)
             text = input()
-            send_message(sock, {"type": "CHAT_MESSAGE", "text": text})
             if text == "#":
+                send_message(sock, {"type": "CHAT_ENDED"})
                 chatting = False
                 break
+            
+            elif text.startswith("/sendfile "):
+                path = text.split(" ", 1)[1]
+                if not os.path.exists(path):
+                    print("[File not found]")
+                    continue
+                
+                try:
+                    with open(path, "rb") as f:
+                        file_data = f.read()
+                    encoded_data = file_data.decode('latin1')  # Use latin1 to preserve binary in JSON
+                    send_message(sock, {
+                        "type": "FILE_TRANSFER",
+                        "filename": path.split("/")[-1],
+                        "data": encoded_data
+                    })
+                    print(f"[File '{path}' sent]")
+                except Exception as e:
+                    print(f"[Error sending file: {e}]")
+
+            else:
+                send_message(sock, {"type": "CHAT_MESSAGE", "text": text})
+
         except:
             break
 
 def background_listener(sock):
     global chatting
     while True:
+        if chatting:
+            time.sleep(0.2)
+            continue  # Don't compete with chat listener
         msg = recv_message(sock)
         if not msg:
             break
 
         if msg["type"] == "CHAT_INVITE":
             from_user = msg["from"]
-            time.sleep(0.3)
             print(f"\n[Incoming chat request from {from_user}]")
-            time.sleep(1)
+            time.sleep(0.3)
             choice = input("Accept? (y/n): ").strip().lower()
             if choice == "y":
                 send_message(sock, {"type": "CHAT_ACCEPTED"})
                 time.sleep(.3)
-                chat_session(sock, from_user)  # <- Now actually enter session
+                chat_session(sock, from_user)
             else:
                 send_message(sock, {"type": "CHAT_DECLINED"})
 

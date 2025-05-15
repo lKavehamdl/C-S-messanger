@@ -47,6 +47,14 @@ def chat_session(user1, user2):
                     "from": source_user,
                     "text": msg["text"]
                 })
+            elif msg.get("type") == "FILE_TRANSFER":
+                send_message(dest_sock, {
+                    "type": "FILE_TRANSFER",
+                    "filename": msg["filename"],
+                    "data": msg["data"],
+                    "from": source_user
+                })
+                
             elif msg.get("type") == "CHAT_ENDED" or msg.get("text") == "#":
                 send_message(dest_sock, {"type": "CHAT_ENDED"})
                 break
