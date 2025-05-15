@@ -2,7 +2,7 @@ import socket
 import threading
 import json
 
-clients = {}  # username: {'socket': ..., 'addr': ..., 'port': ..., 'thread': ..., 'in_chat': False}
+clients = {}  #socket, addr, port, thread, in_chat
 lock = threading.Lock()
 
 def log(message):
@@ -144,7 +144,7 @@ def handle_client(client_sock, addr):
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(("0.0.0.0", 11111))
+    server.bind(("0.0.0.0", 5555))
     server.listen()
     print("[*] Server listening on port 5555")
     log("[*] Server listening on port 5555")

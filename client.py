@@ -2,7 +2,6 @@ import socket
 import threading
 import json
 import time
-import base64
 import os
 
 chatting = False
@@ -24,7 +23,6 @@ def chat_session(sock, peer_name):
 
     def listen():
         global chatting
-        file_buffer = None
         filename = None
 
         while chatting:
@@ -47,7 +45,7 @@ def chat_session(sock, peer_name):
             elif msg["type"] == "FILE_TRANSFER":
                 filename = msg["filename"]
                 sender = msg.get("from", "Unknown")
-                file_data = msg["data"].encode('latin1')  # Decode using same method used to encode
+                file_data = msg["data"].encode('latin1')
                 with open("received_" + filename, "wb") as f:
                     f.write(file_data)
                 print(f"\n[Receiving file '{filename}' from {sender}]")
@@ -74,7 +72,7 @@ def chat_session(sock, peer_name):
                 try:
                     with open(path, "rb") as f:
                         file_data = f.read()
-                    encoded_data = file_data.decode('latin1')  # Use latin1 to preserve binary in JSON
+                    encoded_data = file_data.decode('latin1') 
                     send_message(sock, {
                         "type": "FILE_TRANSFER",
                         "filename": path.split("/")[-1],
@@ -95,7 +93,7 @@ def background_listener(sock):
     while True:
         if chatting:
             time.sleep(0.2)
-            continue  # Don't compete with chat listener
+            continue  
         msg = recv_message(sock)
         if not msg:
             break
@@ -115,9 +113,8 @@ def background_listener(sock):
 def main():
     global chatting
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(("127.0.0.1", 11111))
+    client.connect(("127.0.0.1", 5555))
 
-    # Username login
     while True:
         msg = recv_message(client)
         if msg["type"] == "REQUEST_USERNAME":
