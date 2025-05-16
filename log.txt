@@ -269,3 +269,50 @@
 [-] test disconnected
 [-] test2 disconnected
 [-] test3 disconnected
+[*] Server listening on port 5555
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 48908)
+[-] TESTTTT disconnected
+[+] test4 signed up from ('127.0.0.1', 55388)
+[-] test4 disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 58390)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 39654)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 50252)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 54150)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 54672)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 53134)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 53860)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 44180)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 57484)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 47244)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 41376)
+[-] test disconnected
+[*] Server listening on port 5555
+[+] test logged in from ('127.0.0.1', 48832)
+[-] TESTTTT disconnected
+[*] Server listening on port 5555
+[+] test2 logged in from ('127.0.0.1', 36542)
+[+] test3 logged in from ('127.0.0.1', 34800)
+[-] test3 disconnected
+[-] test disconnected

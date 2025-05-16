@@ -254,9 +254,16 @@ def handle_client(client_sock, addr):
 
             elif msg["type"] == "RENAME":
                 new_name = msg["new_username"]
+                old_username = msg["old_username"]
                 with lock:
                     if new_name.isalnum() and new_name not in clients:
                         clients[new_name] = clients.pop(username)
+                        with open('users.txt', 'r') as f:
+                            usernames = [line.strip() for line in f if line.strip()]
+                        usernames.remove(old_username)
+                        usernames.append(new_name)
+                        with open('users.txt', 'w') as f:
+                            f.write('\n'.join(usernames) + '\n')
                         username = new_name
                         send_message(client_sock, {"type": "USERNAME_CHANGED", "new_username": new_name})
                     else:

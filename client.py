@@ -224,7 +224,7 @@ def main():
 
         elif choice == "3":
             newname = input("New username: ")
-            send_message(client, {"type": "RENAME", "new_username": newname})
+            send_message(client, {"type": "RENAME", "new_username": newname, "old_username": username})
             res = recv_message(client)
             if res and res.get("type") == "USERNAME_CHANGED":
                 print("Username updated:", res["new_username"])
